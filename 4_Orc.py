@@ -45,3 +45,8 @@ for i in range(1, idLength):
         print("\n\n#### RESULT ####")
         print("pw : " + result)
 
+url = "http://los.eagle-jump.org/orc_47190a4d33f675a601f8def32df2583a.php?pw=" + result
+r = get(url, cookies=cookies)
+
+if r.text.find("<h2>ORC Clear!</h2>") > 0:
+    print("축하합니다! Orc를 클리어했습니다.")
