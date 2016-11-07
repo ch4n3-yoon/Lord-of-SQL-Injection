@@ -1,6 +1,12 @@
 # -*- coding : UTF-8 -*-
 from requests import get
 
+'''
+이 문제에 대해서는 딱히 풀이를 제공할 마음이 없습니다.
+구글링. 이 문제는 단순히 구글에 "SQL Injection"이라고만 검색하셔도 
+충분히 풀 수 있는 문제입니다. 
+'''
+
 #Lord of SQL Injection GREMLIN문제로 URL을 설정합니다.
 url = "http://los.eagle-jump.org/gremlin_bbc5af7bed14aa50b84986f2de742f31.php"
 
