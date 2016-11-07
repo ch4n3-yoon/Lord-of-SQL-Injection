@@ -11,3 +11,5 @@ Lord of SQL Injection (주석은 한글로 작성되어 있습니다. / Comments
 8. Troll : http://chaneyoon.tistory.com/58
 9. Vampire : http://chaneyoon.tistory.com/59
 10. Skeleton : http://chaneyoon.tistory.com/60
+11. Golem : http://chaneyoon.tistory.com/61
+12. Darknight : http://chaneyoon.tistory.com/62
