@@ -1,8 +1,9 @@
-# -*- coding : UTF-8 -*-
+#!/usr/bin/python
+# coding: utf-8
 import requests
 
 # Set cookies
-cookies = dict(PHPSESSID="nc4nf3ct0kcv2k803r37v93di4")
+cookies = dict(PHPSESSID="gequo9hff2f19sjmieftjnuf50")
 
 
 
