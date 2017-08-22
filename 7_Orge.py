@@ -58,5 +58,6 @@ url = "http://los.eagle-jump.org/orge_40d2b61f694f72448be9c97d1cea2480.php?pw=" 
 r = requests.get(url, headers=headers)
 
 if r.text.find("<h2>ORGE Clear!</h2>") > 0:
-    print("Orge Clear!")
+    print "[*] message : Orge Clear!"
     
+print "[*] total queries : {0}".format(query)
