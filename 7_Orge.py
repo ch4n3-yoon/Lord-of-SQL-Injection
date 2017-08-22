@@ -32,8 +32,6 @@ for i in range(100):
 
 
 
-print "[*] the password : ",
-stdout.flush()
 
 print("\n\n#### Starting Blind SQL Injection ####\n")
 for i in range(1, length + 1):
